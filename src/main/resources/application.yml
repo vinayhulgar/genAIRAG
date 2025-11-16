@@ -13,6 +13,22 @@ spring:
         format_sql: true
   
   ai:
+    bedrock:
+      aws:
+        region: ${AWS_REGION:us-east-1}
+        access-key: ${AWS_ACCESS_KEY_ID:}
+        secret-key: ${AWS_SECRET_ACCESS_KEY:}
+      anthropic:
+        chat:
+          enabled: true
+          model: anthropic.claude-3-sonnet-20240229-v1:0
+          options:
+            temperature: 0.1
+            max-tokens: 1000
+      titan:
+        embedding:
+          enabled: true
+          model: amazon.titan-embed-text-v1
     openai:
       api-key: ${OPENAI_API_KEY:}
       chat:

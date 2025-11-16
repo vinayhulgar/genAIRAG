@@ -49,15 +49,15 @@ This plan is structured in phases to teach you advanced AI/ML concepts progressi
     - _Requirements: 9.1, 9.2, 9.3_
     - _Learning: End-to-end document processing pipeline_
 
-- [ ] 4. Build basic RAG query pipeline
-  - [ ] 4.1 Implement vector similarity search
+- [x] 4. Build basic RAG query pipeline
+  - [x] 4.1 Implement vector similarity search
     - Create RetrievalService with vector search using Spring AI VectorStore
     - Implement top-k retrieval (k=10)
     - Add filtering by metadata (document type, date range)
     - _Requirements: 1.3_
     - _Learning: Vector similarity search, cosine similarity_
   
-  - [ ] 4.2 Integrate LLM for response generation
+  - [x] 4.2 Integrate LLM for response generation
     - Configure AWS Bedrock with Amazon Nova using Spring AI
     - Create SynthesisService with ChatClient
     - Implement prompt template with context injection
@@ -65,7 +65,7 @@ This plan is structured in phases to teach you advanced AI/ML concepts progressi
     - _Requirements: 5.1, 5.2, 5.3_
     - _Learning: RAG basics, prompt engineering, LLM integration_
   
-  - [ ] 4.3 Write integration tests for basic RAG flow
+  - [x] 4.3 Write integration tests for basic RAG flow
     - Test document upload and embedding generation
     - Test query with retrieval and response generation
     - Verify response includes source citations
