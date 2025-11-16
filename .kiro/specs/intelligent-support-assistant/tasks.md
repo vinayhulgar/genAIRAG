@@ -12,22 +12,22 @@ This plan is structured in phases to teach you advanced AI/ML concepts progressi
   - _Requirements: All (foundation)_
   - _Learning: Spring Boot project structure, dependency management_
 
-- [ ] 2. Implement basic vector database integration with Weaviate
-  - [ ] 2.1 Configure Weaviate client and connection
+- [x] 2. Implement basic vector database integration with Weaviate
+  - [x] 2.1 Configure Weaviate client and connection
     - Add Weaviate Spring AI dependency
     - Create WeaviateConfig class with connection settings
     - Implement health check for Weaviate connection
     - _Requirements: 1.1_
     - _Learning: Vector database basics, Spring AI VectorStore abstraction_
   
-  - [ ] 2.2 Create Document model and repository
+  - [x] 2.2 Create Document model and repository
     - Implement Document entity with JPA annotations
     - Create DocumentMetadata embeddable class
     - Build DocumentRepository interface extending JpaRepository
     - _Requirements: 9.5_
     - _Learning: JPA entities, embeddings storage_
   
-  - [ ] 2.3 Implement document chunking service
+  - [x] 2.3 Implement document chunking service
     - Create DocumentChunker service using Spring AI TokenTextSplitter
     - Configure chunk size (500-1000 tokens) and overlap (100 tokens)
     - Implement metadata extraction (title, headers, dates)

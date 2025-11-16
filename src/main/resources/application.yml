@@ -21,6 +21,17 @@ spring:
           temperature: 0.1
           max-tokens: 1000
 
+weaviate:
+  scheme: ${WEAVIATE_SCHEME:http}
+  host: ${WEAVIATE_HOST:localhost:8080}
+  api-key: ${WEAVIATE_API_KEY:}
+  class-name: SupportDocument
+
+document:
+  chunking:
+    chunk-size: 800
+    chunk-overlap: 100
+
 server:
   port: 8080
   error:

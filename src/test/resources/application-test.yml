@@ -14,6 +14,17 @@ spring:
     openai:
       api-key: test-key
 
+weaviate:
+  scheme: http
+  host: localhost:8080
+  api-key: 
+  class-name: SupportDocument
+
+document:
+  chunking:
+    chunk-size: 800
+    chunk-overlap: 100
+
 logging:
   level:
     root: WARN

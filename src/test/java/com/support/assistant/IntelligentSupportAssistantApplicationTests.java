@@ -6,9 +6,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles("test")
 @EnableAutoConfiguration(exclude = {
-    org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration.class
+    org.springframework.ai.autoconfigure.openai.OpenAiAutoConfiguration.class,
+    org.springframework.ai.autoconfigure.vectorstore.weaviate.WeaviateVectorStoreAutoConfiguration.class
 })
 class IntelligentSupportAssistantApplicationTests {
 
