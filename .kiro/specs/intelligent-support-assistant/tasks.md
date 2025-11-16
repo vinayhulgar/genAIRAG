@@ -34,15 +34,15 @@ This plan is structured in phases to teach you advanced AI/ML concepts progressi
     - _Requirements: 9.2_
     - _Learning: Text chunking strategies, token counting_
 
-- [ ] 3. Integrate embedding model and store embeddings
-  - [ ] 3.1 Configure embedding model (OpenAI or AWS Bedrock)
+- [x] 3. Integrate embedding model and store embeddings
+  - [x] 3.1 Configure embedding model (OpenAI or AWS Bedrock)
     - Create EmbeddingConfig with model selection
     - Implement EmbeddingService using Spring AI EmbeddingModel
     - Add caching for frequently embedded queries
     - _Requirements: 1.2_
     - _Learning: Embeddings, vector representations, semantic similarity_
   
-  - [ ] 3.2 Implement document ingestion pipeline
+  - [x] 3.2 Implement document ingestion pipeline
     - Create DocumentIngestionService that chunks, embeds, and stores documents
     - Build REST endpoint POST /api/v1/documents for document upload
     - Support PDF, Markdown, and text formats using Spring AI DocumentReader
