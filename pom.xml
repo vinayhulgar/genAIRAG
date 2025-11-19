@@ -92,6 +92,13 @@
             <optional>true</optional>
         </dependency>
         
+        <!-- Token counting for context compression -->
+        <dependency>
+            <groupId>com.knuddels</groupId>
+            <artifactId>jtokkit</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

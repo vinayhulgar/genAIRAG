@@ -96,15 +96,15 @@ This plan is structured in phases to teach you advanced AI/ML concepts progressi
     - _Requirements: 1.3_
     - _Learning: Cross-encoders vs bi-encoders, reranking strategies_
 
-- [ ] 6. Implement context compression
-  - [ ] 6.1 Build extractive compression service
+- [x] 6. Implement context compression
+  - [x] 6.1 Build extractive compression service
     - Create ContextCompressor that scores sentences by relevance
     - Use embedding similarity between query and sentences
     - Remove redundant information using semantic deduplication
     - _Requirements: 3.1, 3.2_
     - _Learning: Context compression techniques, token optimization_
   
-  - [ ] 6.2 Add token budget management
+  - [x] 6.2 Add token budget management
     - Implement token counting using tiktoken or similar
     - Enforce max context size (4000 tokens)
     - Log compression ratios for monitoring
