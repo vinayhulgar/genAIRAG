@@ -68,6 +68,11 @@ reranker:
 query:
   use-hybrid-search: true
 
+multihop:
+  enabled: true
+  max-hops: 3
+  top-k-per-hop: 10
+
 server:
   port: 8080
   error:

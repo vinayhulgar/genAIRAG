@@ -111,21 +111,21 @@ This plan is structured in phases to teach you advanced AI/ML concepts progressi
     - _Requirements: 3.3, 3.5_
     - _Learning: Token management, cost optimization_
 
-- [ ] 7. Implement multi-hop RAG
-  - [ ] 7.1 Build entity extraction service
+- [x] 7. Implement multi-hop RAG
+  - [x] 7.1 Build entity extraction service
     - Create EntityExtractor using LLM to extract key entities from retrieved docs
     - Identify concepts that need additional context
     - _Requirements: 2.3_
     - _Learning: Entity extraction, information extraction_
   
-  - [ ] 7.2 Implement iterative retrieval
+  - [x] 7.2 Implement iterative retrieval
     - Create MultiHopRetriever that performs 2-3 retrieval rounds
     - Use extracted entities for follow-up queries
     - Combine and deduplicate results across hops
     - _Requirements: 2.3_
     - _Learning: Multi-hop reasoning, iterative retrieval_
   
-  - [ ] 7.3 Test multi-hop retrieval with complex queries
+  - [x] 7.3 Test multi-hop retrieval with complex queries
     - Create test cases requiring information from multiple documents
     - Verify all relevant information is retrieved
     - _Requirements: 2.3_

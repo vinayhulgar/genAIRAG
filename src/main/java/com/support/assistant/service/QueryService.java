@@ -25,10 +25,14 @@ public class QueryService {
 
     private final RetrievalService retrievalService;
     private final HybridSearchService hybridSearchService;
+    private final MultiHopRetriever multiHopRetriever;
     private final SynthesisService synthesisService;
 
     @Value("${query.use-hybrid-search:true}")
     private boolean useHybridSearch;
+
+    @Value("${multihop.enabled:true}")
+    private boolean useMultiHop;
 
     /**
      * Processes a query through the RAG pipeline.
@@ -41,12 +45,24 @@ public class QueryService {
         long startTime = System.currentTimeMillis();
         
         try {
-            // Step 1: Retrieve relevant documents using hybrid search or vector search
+            // Step 1: Retrieve relevant documents using multi-hop, hybrid search, or vector search
             Map<String, Object> filters = extractFilters(request.context());
             List<Document> retrievedDocuments;
             String retrievalMethod;
+            int hopsPerformed = 1;
             
-            if (useHybridSearch) {
+            if (useMultiHop) {
+                log.debug("Using multi-hop retrieval");
+                MultiHopRetriever.MultiHopResult multiHopResult = multiHopRetriever.retrieve(
+                    request.query(),
+                    filters
+                );
+                retrievedDocuments = multiHopResult.documents();
+                hopsPerformed = multiHopResult.hopsPerformed();
+                retrievalMethod = "multi_hop_retrieval";
+                log.debug("Multi-hop retrieval completed: {} documents across {} hops", 
+                    retrievedDocuments.size(), hopsPerformed);
+            } else if (useHybridSearch) {
                 log.debug("Using hybrid search (vector + keyword + reranking)");
                 retrievedDocuments = hybridSearchService.hybridSearch(
                     request.query(),
@@ -80,7 +96,7 @@ public class QueryService {
                 (int) latencyMs,
                 synthesisResult.modelUsed(),
                 Instant.now(),
-                buildAdditionalInfo(retrievedDocuments.size(), retrievalMethod)
+                buildAdditionalInfo(retrievedDocuments.size(), retrievalMethod, hopsPerformed)
             );
             
             // For now, confidence score is set to 1.0 (will be implemented in validation phase)
@@ -135,6 +151,17 @@ public class QueryService {
         Map<String, Object> info = new HashMap<>();
         info.put("documentsRetrieved", documentsRetrieved);
         info.put("retrievalMethod", retrievalMethod);
+        return info;
+    }
+
+    /**
+     * Builds additional metadata information with hop count.
+     */
+    private Map<String, Object> buildAdditionalInfo(int documentsRetrieved, String retrievalMethod, int hopsPerformed) {
+        Map<String, Object> info = buildAdditionalInfo(documentsRetrieved, retrievalMethod);
+        if (hopsPerformed > 1) {
+            info.put("hopsPerformed", hopsPerformed);
+        }
         return info;
     }
 }
