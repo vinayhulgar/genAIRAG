@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Service for hybrid search combining vector similarity and keyword search.
  * Uses Reciprocal Rank Fusion (RRF) algorithm to merge ranked lists.
+ * Supports reactive async execution with Mono.
  */
 @Service
 @RequiredArgsConstructor
@@ -35,7 +37,53 @@ public class HybridSearchService {
     private boolean useReranking;
 
     /**
-     * Performs hybrid search combining vector and keyword results using RRF.
+     * Performs hybrid search combining vector and keyword results using RRF reactively.
+     * Optionally applies cross-encoder reranking for improved relevance.
+     * 
+     * @param query the search query
+     * @param topK number of final results to return
+     * @param filters optional metadata filters for vector search
+     * @return Mono of list of documents ranked by RRF score (and optionally reranked)
+     */
+    public Mono<List<Document>> hybridSearchAsync(String query, int topK, Map<String, Object> filters) {
+        log.debug("Performing async hybrid search for query: '{}' with topK={}", query, topK);
+        
+        int finalTopK = topK <= 0 ? 10 : topK;
+        int retrievalK = finalTopK * 2;
+
+        // Execute vector and keyword searches in parallel
+        Mono<List<Document>> vectorResultsMono = retrievalService.retrieveAsync(query, retrievalK, filters);
+        Mono<List<KeywordSearchService.SearchResult>> keywordResultsMono = 
+            keywordSearchService.searchAsync(query, retrievalK);
+
+        return Mono.zip(vectorResultsMono, keywordResultsMono)
+            .flatMap(tuple -> {
+                List<Document> vectorResults = tuple.getT1();
+                List<KeywordSearchService.SearchResult> keywordResults = tuple.getT2();
+                
+                log.debug("Parallel search completed: {} vector + {} keyword results", 
+                    vectorResults.size(), keywordResults.size());
+                
+                // Apply RRF fusion
+                List<Document> fusedResults = applyRRF(vectorResults, keywordResults, retrievalK);
+                
+                // Apply reranking if enabled
+                if (useReranking) {
+                    return rerankerService.rerankAsync(query, fusedResults, finalTopK);
+                } else {
+                    return Mono.just(fusedResults.stream().limit(finalTopK).collect(Collectors.toList()));
+                }
+            })
+            .doOnSuccess(results -> 
+                log.info("Async hybrid search returned {} results", results.size()))
+            .onErrorResume(error -> {
+                log.error("Error during async hybrid search, falling back to vector search only", error);
+                return retrievalService.retrieveAsync(query, finalTopK, filters);
+            });
+    }
+
+    /**
+     * Performs hybrid search combining vector and keyword results using RRF (synchronous).
      * Optionally applies cross-encoder reranking for improved relevance.
      * 
      * @param query the search query
@@ -185,5 +233,12 @@ public class HybridSearchService {
      */
     public List<Document> hybridSearch(String query) {
         return hybridSearch(query, 10, null);
+    }
+
+    /**
+     * Convenience method for async hybrid search with default topK=10 and no filters.
+     */
+    public Mono<List<Document>> hybridSearchAsync(String query) {
+        return hybridSearchAsync(query, 10, null);
     }
 }

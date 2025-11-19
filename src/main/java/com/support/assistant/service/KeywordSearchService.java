@@ -11,6 +11,8 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 /**
  * Service for keyword-based search using Elasticsearch BM25 algorithm.
  * Provides full-text search capabilities with inverted indexes.
+ * Supports reactive async execution with Mono.
  */
 @Service
 @RequiredArgsConstructor
@@ -27,7 +30,23 @@ public class KeywordSearchService {
     private final ElasticsearchOperations elasticsearchOperations;
 
     /**
-     * Performs BM25-based keyword search on document content.
+     * Performs BM25-based keyword search on document content reactively.
+     * 
+     * @param query the search query
+     * @param topK number of top results to return
+     * @return Mono of list of search results with BM25 scores
+     */
+    public Mono<List<SearchResult>> searchAsync(String query, int topK) {
+        log.debug("Performing async keyword search for query: '{}' with topK={}", query, topK);
+        
+        return Mono.fromCallable(() -> search(query, topK))
+            .subscribeOn(Schedulers.boundedElastic())
+            .doOnSuccess(results -> log.debug("Async keyword search completed: {} results", results.size()))
+            .doOnError(error -> log.error("Async keyword search failed", error));
+    }
+
+    /**
+     * Performs BM25-based keyword search on document content (synchronous).
      * 
      * @param query the search query
      * @param topK number of top results to return

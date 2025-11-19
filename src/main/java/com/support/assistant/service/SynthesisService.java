@@ -7,6 +7,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +20,7 @@ import java.util.regex.Pattern;
 /**
  * Service for generating responses using LLM with retrieved context.
  * Implements RAG synthesis with prompt engineering and source citation.
+ * Supports reactive async execution with Mono.
  */
 @Service
 @RequiredArgsConstructor
@@ -43,7 +46,23 @@ public class SynthesisService {
         Answer:""";
 
     /**
-     * Generates a response using the LLM with retrieved context.
+     * Generates a response using the LLM with retrieved context reactively.
+     * 
+     * @param query the user's question
+     * @param retrievedDocuments documents retrieved from vector search
+     * @return Mono of synthesized response with citations
+     */
+    public Mono<SynthesisResult> synthesizeAsync(String query, List<Document> retrievedDocuments) {
+        log.debug("Synthesizing response asynchronously for query: '{}'", query);
+        
+        return Mono.fromCallable(() -> synthesize(query, retrievedDocuments))
+            .subscribeOn(Schedulers.boundedElastic())
+            .doOnSuccess(result -> log.debug("Async synthesis completed: {} tokens", result.tokensUsed()))
+            .doOnError(error -> log.error("Async synthesis failed", error));
+    }
+
+    /**
+     * Generates a response using the LLM with retrieved context (synchronous).
      * 
      * @param query the user's question
      * @param retrievedDocuments documents retrieved from vector search

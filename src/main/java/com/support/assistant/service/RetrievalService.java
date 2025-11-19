@@ -8,6 +8,8 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.filter.Filter;
 import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import java.util.Map;
 /**
  * Service for retrieving relevant documents using vector similarity search.
  * Implements top-k retrieval with metadata filtering capabilities.
+ * Supports reactive async execution with Mono/Flux.
  */
 @Service
 @RequiredArgsConstructor
@@ -26,7 +29,24 @@ public class RetrievalService {
     private final VectorStore vectorStore;
 
     /**
-     * Performs vector similarity search to retrieve relevant documents.
+     * Performs vector similarity search to retrieve relevant documents reactively.
+     * 
+     * @param query the search query
+     * @param topK number of top results to return (default: 10)
+     * @param filters optional metadata filters (document type, date range, etc.)
+     * @return Mono of list of relevant documents with similarity scores
+     */
+    public Mono<List<Document>> retrieveAsync(String query, int topK, Map<String, Object> filters) {
+        log.debug("Performing async vector search for query: '{}' with topK={}", query, topK);
+        
+        return Mono.fromCallable(() -> retrieve(query, topK, filters))
+            .subscribeOn(Schedulers.boundedElastic())
+            .doOnSuccess(docs -> log.debug("Async retrieval completed: {} documents", docs.size()))
+            .doOnError(error -> log.error("Async retrieval failed", error));
+    }
+
+    /**
+     * Performs vector similarity search to retrieve relevant documents (synchronous).
      * 
      * @param query the search query
      * @param topK number of top results to return (default: 10)
@@ -74,6 +94,13 @@ public class RetrievalService {
      */
     public List<Document> retrieve(String query) {
         return retrieve(query, 10, null);
+    }
+
+    /**
+     * Convenience method for async retrieval with default topK=10 and no filters.
+     */
+    public Mono<List<Document>> retrieveAsync(String query) {
+        return retrieveAsync(query, 10, null);
     }
 
     /**

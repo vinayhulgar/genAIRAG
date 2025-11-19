@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import java.util.Map;
 /**
  * Service for processing user queries using RAG pipeline.
  * Orchestrates retrieval and synthesis to generate responses.
+ * Supports reactive async execution with Mono.
  */
 @Service
 @RequiredArgsConstructor
