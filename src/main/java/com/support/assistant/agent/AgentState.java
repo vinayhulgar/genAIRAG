@@ -3,11 +3,11 @@ package com.support.assistant.agent;
 import com.support.assistant.model.dto.QueryPlan;
 import com.support.assistant.model.dto.QueryRequest;
 import com.support.assistant.model.dto.QueryResponse;
-import com.support.assistant.model.entity.Document;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.ai.document.Document;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class AgentState {
     private QueryPlan queryPlan;
     
     /**
-     * Documents retrieved by the retrieval agent
+     * Documents retrieved by the retrieval agent (Spring AI documents)
      */
     @Builder.Default
     private List<Document> retrievedDocuments = new ArrayList<>();
