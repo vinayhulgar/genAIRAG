@@ -45,10 +45,28 @@ weaviate:
   api-key: ${WEAVIATE_API_KEY:}
   class-name: SupportDocument
 
+elasticsearch:
+  host: ${ELASTICSEARCH_HOST:localhost:9200}
+  username: ${ELASTICSEARCH_USERNAME:}
+  password: ${ELASTICSEARCH_PASSWORD:}
+
 document:
   chunking:
     chunk-size: 800
     chunk-overlap: 100
+
+hybrid-search:
+  vector-weight: 0.6
+  keyword-weight: 0.4
+  rrf-k: 60
+  use-reranking: true
+
+reranker:
+  enabled: true
+  top-k: 10
+
+query:
+  use-hybrid-search: true
 
 server:
   port: 8080

@@ -1,6 +1,8 @@
 package com.support.assistant.service;
 
 import com.support.assistant.model.dto.DocumentUpload;
+import com.support.assistant.model.entity.SearchableDocument;
+import com.support.assistant.repository.SearchableDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +32,7 @@ public class DocumentIngestionService {
     private final DocumentChunker documentChunker;
     private final EmbeddingService embeddingService;
     private final VectorStore vectorStore;
+    private final SearchableDocumentRepository searchableDocumentRepository;
 
     /**
      * Ingests a document through the complete pipeline:
@@ -96,8 +100,18 @@ public class DocumentIngestionService {
         .flatMap(chunks -> {
             // Store in vector database
             log.info("Storing {} chunks in vector database", chunks.size());
-            return Mono.fromRunnable(() -> vectorStore.add(chunks))
-                    .thenReturn(chunks.size());
+            return Mono.fromRunnable(() -> {
+                vectorStore.add(chunks);
+                
+                // Also index in Elasticsearch for keyword search
+                log.debug("Indexing {} chunks in Elasticsearch", chunks.size());
+                for (Document chunk : chunks) {
+                    SearchableDocument searchableDoc = convertToSearchableDocument(chunk);
+                    searchableDocumentRepository.save(searchableDoc);
+                }
+                log.info("Successfully indexed {} chunks in Elasticsearch", chunks.size());
+            })
+            .thenReturn(chunks.size());
         })
         .doOnSuccess(count -> 
                 log.info("Successfully ingested document '{}' with {} chunks", 
@@ -190,6 +204,30 @@ public class DocumentIngestionService {
         } else {
             return "text"; // Default to text
         }
+    }
+
+    /**
+     * Converts Spring AI Document to Elasticsearch SearchableDocument.
+     *
+     * @param document the Spring AI document
+     * @return SearchableDocument for Elasticsearch indexing
+     */
+    private SearchableDocument convertToSearchableDocument(Document document) {
+        Map<String, Object> metadata = document.getMetadata();
+        
+        return SearchableDocument.builder()
+                .id(document.getId())
+                .content(document.getContent())
+                .title((String) metadata.getOrDefault("title", ""))
+                .source((String) metadata.getOrDefault("source", ""))
+                .documentType((String) metadata.getOrDefault("document_type", ""))
+                .author((String) metadata.getOrDefault("author", ""))
+                .version((String) metadata.getOrDefault("version", ""))
+                .chunkIndex((Integer) metadata.get("chunk_index"))
+                .createdAt(metadata.containsKey("created_at") ? 
+                        (Instant) metadata.get("created_at") : Instant.now())
+                .updatedAt(Instant.now())
+                .build();
     }
 
     /**

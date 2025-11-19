@@ -6,6 +6,7 @@ import com.support.assistant.model.dto.ResponseMetadata;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -23,7 +24,11 @@ import java.util.Map;
 public class QueryService {
 
     private final RetrievalService retrievalService;
+    private final HybridSearchService hybridSearchService;
     private final SynthesisService synthesisService;
+
+    @Value("${query.use-hybrid-search:true}")
+    private boolean useHybridSearch;
 
     /**
      * Processes a query through the RAG pipeline.
@@ -36,15 +41,30 @@ public class QueryService {
         long startTime = System.currentTimeMillis();
         
         try {
-            // Step 1: Retrieve relevant documents using vector similarity search
+            // Step 1: Retrieve relevant documents using hybrid search or vector search
             Map<String, Object> filters = extractFilters(request.context());
-            List<Document> retrievedDocuments = retrievalService.retrieve(
-                request.query(),
-                10, // top-k
-                filters
-            );
+            List<Document> retrievedDocuments;
+            String retrievalMethod;
             
-            log.debug("Retrieved {} documents", retrievedDocuments.size());
+            if (useHybridSearch) {
+                log.debug("Using hybrid search (vector + keyword + reranking)");
+                retrievedDocuments = hybridSearchService.hybridSearch(
+                    request.query(),
+                    10, // top-k
+                    filters
+                );
+                retrievalMethod = "hybrid_search";
+            } else {
+                log.debug("Using vector search only");
+                retrievedDocuments = retrievalService.retrieve(
+                    request.query(),
+                    10, // top-k
+                    filters
+                );
+                retrievalMethod = "vector_similarity";
+            }
+            
+            log.debug("Retrieved {} documents using {}", retrievedDocuments.size(), retrievalMethod);
             
             // Step 2: Synthesize response using LLM
             SynthesisService.SynthesisResult synthesisResult = synthesisService.synthesize(
@@ -60,7 +80,7 @@ public class QueryService {
                 (int) latencyMs,
                 synthesisResult.modelUsed(),
                 Instant.now(),
-                buildAdditionalInfo(retrievedDocuments.size())
+                buildAdditionalInfo(retrievedDocuments.size(), retrievalMethod)
             );
             
             // For now, confidence score is set to 1.0 (will be implemented in validation phase)
@@ -111,10 +131,10 @@ public class QueryService {
     /**
      * Builds additional metadata information.
      */
-    private Map<String, Object> buildAdditionalInfo(int documentsRetrieved) {
+    private Map<String, Object> buildAdditionalInfo(int documentsRetrieved, String retrievalMethod) {
         Map<String, Object> info = new HashMap<>();
         info.put("documentsRetrieved", documentsRetrieved);
-        info.put("retrievalMethod", "vector_similarity");
+        info.put("retrievalMethod", retrievalMethod);
         return info;
     }
 }

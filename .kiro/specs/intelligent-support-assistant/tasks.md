@@ -74,22 +74,22 @@ This plan is structured in phases to teach you advanced AI/ML concepts progressi
 
 ## Phase 2: Advanced Retrieval Patterns
 
-- [ ] 5. Implement hybrid search (vector + keyword)
-  - [ ] 5.1 Add Elasticsearch for keyword search
+- [x] 5. Implement hybrid search (vector + keyword)
+  - [x] 5.1 Add Elasticsearch for keyword search
     - Configure Elasticsearch client with Spring Data Elasticsearch
     - Create document index with text fields for BM25 search
     - Implement keyword search service
     - _Requirements: 1.4_
     - _Learning: BM25 algorithm, full-text search, inverted indexes_
   
-  - [ ] 5.2 Implement Reciprocal Rank Fusion (RRF)
+  - [x] 5.2 Implement Reciprocal Rank Fusion (RRF)
     - Create HybridSearchService that combines vector and keyword results
     - Implement RRF algorithm to merge ranked lists
     - Configure fusion weights (vector: 0.6, keyword: 0.4)
     - _Requirements: 1.4_
     - _Learning: Rank fusion algorithms, hybrid retrieval strategies_
   
-  - [ ] 5.3 Add cross-encoder reranking
+  - [x] 5.3 Add cross-encoder reranking
     - Integrate reranking model (e.g., cross-encoder/ms-marco-MiniLM)
     - Implement RerankerService to score query-document pairs
     - Rerank top 20 results to final top 10
