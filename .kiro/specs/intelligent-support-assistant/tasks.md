@@ -133,21 +133,21 @@ This plan is structured in phases to teach you advanced AI/ML concepts progressi
 
 ## Phase 3: Query Planning & Decomposition
 
-- [ ] 8. Implement query analysis and planning
-  - [ ] 8.1 Build query classifier
+- [x] 8. Implement query analysis and planning
+  - [x] 8.1 Build query classifier
     - Create QueryClassifier that categorizes queries (factual, comparison, procedural)
     - Use LLM with structured output (function calling)
     - _Requirements: 2.1_
     - _Learning: Query understanding, classification_
   
-  - [ ] 8.2 Implement query decomposition
+  - [x] 8.2 Implement query decomposition
     - Create QueryPlanner that breaks complex queries into sub-queries
     - Use LLM to identify multiple questions in a single query
     - Generate SubQuery objects with dependencies
     - _Requirements: 2.1_
     - _Learning: Query decomposition, dependency analysis_
   
-  - [ ] 8.3 Build dependency resolver
+  - [x] 8.3 Build dependency resolver
     - Implement topological sort for sub-query execution order
     - Create QueryPlan with ordered execution list
     - Handle cyclic dependencies gracefully
